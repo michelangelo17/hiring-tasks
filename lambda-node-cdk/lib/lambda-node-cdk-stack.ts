@@ -8,10 +8,12 @@ export class LambdaNodeCdkStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
+    // Creates a new DynamoDB table, primary partition key: 'id'
     const table = new Table(this, "MyTable", {
       partitionKey: { name: "id", type: AttributeType.STRING },
     });
-
+    // Creates a new Node.js Lambda function, passing the table name as an environment variable
+    // missing, permissions to access the DynamoDB table
     new NodejsFunction(this, "MyFunc", {
       runtime: Runtime.NODEJS_16_X,
       handler: "handler",
@@ -20,5 +22,7 @@ export class LambdaNodeCdkStack extends Stack {
         TABLE_NAME: table.tableName,
       },
     });
+
+    // function code is looking for an api gateway event, but no api gateway is created
   }
 }
