@@ -4,7 +4,6 @@ import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { AttributeType, Table } from "aws-cdk-lib/aws-dynamodb";
 import { LambdaRestApi } from "aws-cdk-lib/aws-apigateway";
-import { create } from "domain";
 
 export class LambdaNodeCdkStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -22,6 +21,7 @@ export class LambdaNodeCdkStack extends Stack {
       entry: "lib/lambda-node.ts",
       environment: {
         TABLE_NAME: table.tableName,
+        REGION: process.env.REGION || "eu-central-1",
       },
     });
 
