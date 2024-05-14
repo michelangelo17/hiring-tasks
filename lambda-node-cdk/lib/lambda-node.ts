@@ -5,19 +5,14 @@ const tableName = process.env.TABLE_NAME;
 // Create a new DynamoDB client, passing the region as an argument
 const dynamoDbClient = new DynamoDB({ region: process.env.REGION || "eu-central-1" });
 
-type DBItem = { item_id: string };
 // Handler, gets an item from the DynamoDB table that matches the primary key via path parameter
 // dynamodb table is not seeded, no function to create items exists
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const itemId = event.pathParameters?.id;
     // Check if the item_id is provided in the event object.
-    console.log(event);
     if (!itemId) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "item_id is required" }),
-      };
+      throw new Error("Item ID is missing");
     }
     const command = new GetItemCommand({
       TableName: tableName,
