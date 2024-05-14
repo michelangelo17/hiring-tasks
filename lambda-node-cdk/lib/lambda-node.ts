@@ -1,4 +1,4 @@
-import { APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDB, GetItemCommand } from "@aws-sdk/client-dynamodb";
 
 const tableName = process.env.TABLE_NAME;
@@ -6,21 +6,27 @@ const tableName = process.env.TABLE_NAME;
 const dynamoDbClient = new DynamoDB({ region: process.env.REGION || "eu-central-1" });
 
 type DBItem = { item_id: string };
-// Handler, gets an item from the DynamoDB table that matches the primary key sent API Gateway event item
+// Handler, gets an item from the DynamoDB table that matches the primary key via path parameter
 // dynamodb table is not seeded, no function to create items exists
-export const handler = async (event: DBItem): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
+    const itemId = event.pathParameters?.id;
     // Check if the item_id is provided in the event object.
-    if (!event.item_id) {
-      throw new Error("item_id is required");
+    console.log(event);
+    if (!itemId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: "item_id is required" }),
+      };
     }
     const command = new GetItemCommand({
       TableName: tableName,
       Key: {
-        id: { S: event.item_id },
+        id: { S: itemId },
       },
     });
     const response = await dynamoDbClient.send(command);
+    console.log(response);
 
     // If the item is not found in the DynamoDB table, return a 404 status code and a message.
     if (!response.Item) {

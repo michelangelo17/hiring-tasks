@@ -30,7 +30,14 @@ export class LambdaNodeCdkStack extends Stack {
     // Creates a new API Gateway REST API with the Lambda function as the handler
     const api = new LambdaRestApi(this, "MyApi", {
       handler: getLambdaFunction,
+      proxy: false,
     });
+
+    // Adds a new resource 'items' to the API
+    // Prefer to use path parmaeters for GET requests
+    const items = api.root.addResource("items");
+    const singleItem = items.addResource("{id}");
+    singleItem.addMethod("GET"); // GET /items/{id}
 
     // Prints out the API endpoint to the terminal
     new CfnOutput(this, "ApiEndpoint", {
