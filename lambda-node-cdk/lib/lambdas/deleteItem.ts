@@ -33,7 +33,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const response = await deleteDynamoDBItem(itemId);
     console.log(response);
 
-    return createResponse(200, { message: "ok - item found", data: response });
+    return createResponse(200, { message: "ok - item deleted", data: response });
   } catch (error) {
     console.error(error);
     return createResponse(500, { message: "ERROR something went wrong!", error });

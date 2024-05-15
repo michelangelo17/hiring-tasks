@@ -14,6 +14,7 @@ export class LambdaConstruct extends Construct implements IGrantable {
   constructor(scope: Construct, id: string, props: CustomProps) {
     super(scope, id);
 
+    // Creates a new Node.js Lambda function with the provided entry file
     this.lambdaFunction = new NodejsFunction(this, "MyCustomLambda", {
       runtime: Runtime.NODEJS_18_X,
       handler: "index.handler",

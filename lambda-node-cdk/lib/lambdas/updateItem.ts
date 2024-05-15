@@ -44,7 +44,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return createResponse(404, { message: "Item not found" });
     }
 
-    return createResponse(200, { message: "ok - item found", data: response });
+    return createResponse(200, { message: "ok - item updated", data: response });
   } catch (error) {
     console.error(error);
     return createResponse(500, { message: "ERROR something went wrong!", error });
