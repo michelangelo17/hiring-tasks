@@ -47,6 +47,11 @@ export class LambdaNodeCdkStack extends Stack {
     // table.grantReadData(scanItemsLambdaFunction);
     table.grantReadData(getItemByIdLambdaFunction);
 
+    // Grants the Lambda functions write access to the DynamoDB table
+    // table.grantReadWriteData(createItemLambdaFunction);
+    table.grantReadWriteData(updateItemLambdaFunction);
+    // table.grantReadWriteData(deleteItemLambdaFunction);
+
     // Creates a new API Gateway REST API
     const api = new RestApi(this, "MyApi", {});
 
