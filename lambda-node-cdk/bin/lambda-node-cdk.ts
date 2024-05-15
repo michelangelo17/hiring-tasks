@@ -3,7 +3,7 @@ import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import { LambdaNodeCdkStack } from "../lib/lambda-node-cdk-stack";
 import * as dotenv from "dotenv";
-import { AwsSolutionsChecks } from "cdk-nag";
+// import { AwsSolutionsChecks } from "cdk-nag";
 
 dotenv.config();
 
