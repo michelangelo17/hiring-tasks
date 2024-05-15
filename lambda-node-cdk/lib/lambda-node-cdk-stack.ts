@@ -14,10 +14,10 @@ export class LambdaNodeCdkStack extends Stack {
     });
 
     // Creates a new Node.js Lambda function, scanning the table for all items
-    const scanItemsLambdaFunction = new LambdaConstruct(this, "ScanItemsLambda", {
-      entry: "lib/lambdas/scanItems.ts",
-      tableName: table.tableName,
-    });
+    // const scanItemsLambdaFunction = new LambdaConstruct(this, "ScanItemsLambda", {
+    //   entry: "lib/lambdas/scanItems.ts",
+    //   tableName: table.tableName,
+    // });
 
     // Creates a new Node.js Lambda function, getting an item by id from the table
     const getItemByIdLambdaFunction = new LambdaConstruct(this, "GetItemLambda", {
@@ -26,10 +26,10 @@ export class LambdaNodeCdkStack extends Stack {
     });
 
     // Creates a new Node.js Lambda function, to create a new item in the table
-    const createItemLambdaFunction = new LambdaConstruct(this, "CreateItemLambda", {
-      entry: "lib/lambdas/createItem.ts",
-      tableName: table.tableName,
-    });
+    // const createItemLambdaFunction = new LambdaConstruct(this, "CreateItemLambda", {
+    //   entry: "lib/lambdas/createItem.ts",
+    //   tableName: table.tableName,
+    // });
 
     // Creates a new Node.js Lambda function, to update an item in the table
     const updateItemLambdaFunction = new LambdaConstruct(this, "UpdateItemLambda", {
@@ -37,8 +37,14 @@ export class LambdaNodeCdkStack extends Stack {
       tableName: table.tableName,
     });
 
+    // Creates a new Node.js Lambda function, to delete an item in the table
+    // const deleteItemLambdaFunction = new LambdaConstruct(this, "DeleteItemLambda", {
+    //   entry: "lib/lambdas/deleteItem.ts",
+    //   tableName: table.tableName,
+    // });
+
     // Grants the Lambda functions read access to the DynamoDB table
-    table.grantReadData(scanItemsLambdaFunction);
+    // table.grantReadData(scanItemsLambdaFunction);
     table.grantReadData(getItemByIdLambdaFunction);
 
     // Creates a new API Gateway REST API
@@ -47,9 +53,9 @@ export class LambdaNodeCdkStack extends Stack {
     // Adds a new resource 'items' to the API
     const items = api.root.addResource("items");
     // get all items
-    items.addMethod("GET", new LambdaIntegration(scanItemsLambdaFunction.lambdaFunction));
+    // items.addMethod("GET", new LambdaIntegration(scanItemsLambdaFunction.lambdaFunction));
     // create new item
-    items.addMethod("POST", new LambdaIntegration(createItemLambdaFunction.lambdaFunction));
+    // items.addMethod("POST", new LambdaIntegration(createItemLambdaFunction.lambdaFunction));
 
     // Adds a new resource 'items/{id}' to the API
     const singleItem = items.addResource("{id}");
@@ -58,6 +64,8 @@ export class LambdaNodeCdkStack extends Stack {
     singleItem.addMethod("GET", new LambdaIntegration(getItemByIdLambdaFunction.lambdaFunction));
     // update single item by id
     singleItem.addMethod("PUT", new LambdaIntegration(updateItemLambdaFunction.lambdaFunction));
+    // delete single item by id
+    // singleItem.addMethod("DELETE", new LambdaIntegration(deleteItemLambdaFunction.lambdaFunction));
 
     // Prints out the API endpoint to the terminal
     new CfnOutput(this, "ApiEndpoint", {
