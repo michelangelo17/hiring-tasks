@@ -1,9 +1,8 @@
 import { CfnOutput, Stack, StackProps } from "aws-cdk-lib";
-import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
-import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { AttributeType, Table } from "aws-cdk-lib/aws-dynamodb";
-import { LambdaRestApi } from "aws-cdk-lib/aws-apigateway";
+import { LambdaIntegration, RestApi } from "aws-cdk-lib/aws-apigateway";
+import { LambdaConstruct } from "./constructs/lambdaFunctions";
 
 export class LambdaNodeCdkStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -14,30 +13,51 @@ export class LambdaNodeCdkStack extends Stack {
       partitionKey: { name: "id", type: AttributeType.STRING },
     });
 
-    // Creates a new Node.js Lambda function, passing the table name as an environment variable
-    const getLambdaFunction = new NodejsFunction(this, "MyFunc", {
-      runtime: Runtime.NODEJS_16_X,
-      handler: "handler",
-      entry: "lib/lambda-node.ts",
-      environment: {
-        TABLE_NAME: table.tableName,
-        REGION: process.env.REGION || "eu-central-1",
-      },
+    // Creates a new Node.js Lambda function, scanning the table for all items
+    const scanItemsLambdaFunction = new LambdaConstruct(this, "ScanItemsLambda", {
+      entry: "lib/lambdas/scanItems.ts",
+      tableName: table.tableName,
     });
 
-    table.grantReadData(getLambdaFunction); // Grants the Lambda function read access to the DynamoDB table
-
-    // Creates a new API Gateway REST API with the Lambda function as the handler
-    const api = new LambdaRestApi(this, "MyApi", {
-      handler: getLambdaFunction,
-      proxy: false,
+    // Creates a new Node.js Lambda function, getting an item by id from the table
+    const getItemByIdLambdaFunction = new LambdaConstruct(this, "GetItemLambda", {
+      entry: "lib/lambdas/getItemById.ts",
+      tableName: table.tableName,
     });
+
+    // Creates a new Node.js Lambda function, to create a new item in the table
+    const createItemLambdaFunction = new LambdaConstruct(this, "CreateItemLambda", {
+      entry: "lib/lambdas/createItem.ts",
+      tableName: table.tableName,
+    });
+
+    // Creates a new Node.js Lambda function, to update an item in the table
+    const updateItemLambdaFunction = new LambdaConstruct(this, "UpdateItemLambda", {
+      entry: "lib/lambdas/updateItem.ts",
+      tableName: table.tableName,
+    });
+
+    // Grants the Lambda functions read access to the DynamoDB table
+    table.grantReadData(scanItemsLambdaFunction);
+    table.grantReadData(getItemByIdLambdaFunction);
+
+    // Creates a new API Gateway REST API
+    const api = new RestApi(this, "MyApi", {});
 
     // Adds a new resource 'items' to the API
-    // Prefer to use path parmaeters for GET requests
     const items = api.root.addResource("items");
+    // get all items
+    items.addMethod("GET", new LambdaIntegration(scanItemsLambdaFunction.lambdaFunction));
+    // create new item
+    items.addMethod("POST", new LambdaIntegration(createItemLambdaFunction.lambdaFunction));
+
+    // Adds a new resource 'items/{id}' to the API
     const singleItem = items.addResource("{id}");
-    singleItem.addMethod("GET"); // GET /items/{id}
+
+    // get single item by id
+    singleItem.addMethod("GET", new LambdaIntegration(getItemByIdLambdaFunction.lambdaFunction));
+    // update single item by id
+    singleItem.addMethod("PUT", new LambdaIntegration(updateItemLambdaFunction.lambdaFunction));
 
     // Prints out the API endpoint to the terminal
     new CfnOutput(this, "ApiEndpoint", {
@@ -46,10 +66,6 @@ export class LambdaNodeCdkStack extends Stack {
     // Prints out the table name to the terminal
     new CfnOutput(this, "TableName", {
       value: table.tableName,
-    });
-    // Prints out the lambda arn to the terminal
-    new CfnOutput(this, "LambdaArn", {
-      value: getLambdaFunction.functionArn,
     });
   }
 }
