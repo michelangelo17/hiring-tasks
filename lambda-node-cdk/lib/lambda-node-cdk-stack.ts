@@ -38,10 +38,10 @@ export class LambdaNodeCdkStack extends Stack {
     });
 
     // Creates a new Node.js Lambda function, to delete an item in the table
-    // const deleteItemLambdaFunction = new LambdaConstruct(this, "DeleteItemLambda", {
-    //   entry: "lib/lambdas/deleteItem.ts",
-    //   tableName: table.tableName,
-    // });
+    const deleteItemLambdaFunction = new LambdaConstruct(this, "DeleteItemLambda", {
+      entry: "lib/lambdas/deleteItem.ts",
+      tableName: table.tableName,
+    });
 
     // Grants the Lambda functions read access to the DynamoDB table
     // table.grantReadData(scanItemsLambdaFunction);
@@ -50,7 +50,7 @@ export class LambdaNodeCdkStack extends Stack {
     // Grants the Lambda functions write access to the DynamoDB table
     // table.grantReadWriteData(createItemLambdaFunction);
     table.grantReadWriteData(updateItemLambdaFunction);
-    // table.grantReadWriteData(deleteItemLambdaFunction);
+    table.grantReadWriteData(deleteItemLambdaFunction);
 
     // Creates a new API Gateway REST API
     const api = new RestApi(this, "MyApi", {});
@@ -70,7 +70,7 @@ export class LambdaNodeCdkStack extends Stack {
     // update single item by id
     singleItem.addMethod("PUT", new LambdaIntegration(updateItemLambdaFunction.lambdaFunction));
     // delete single item by id
-    // singleItem.addMethod("DELETE", new LambdaIntegration(deleteItemLambdaFunction.lambdaFunction));
+    singleItem.addMethod("DELETE", new LambdaIntegration(deleteItemLambdaFunction.lambdaFunction));
 
     // Prints out the API endpoint to the terminal
     new CfnOutput(this, "ApiEndpoint", {
