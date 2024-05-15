@@ -28,7 +28,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return createResponse(400, { message: "Body is missing" });
   }
   const itemId = JSON.parse(event.body).id;
-  const newMessage = JSON.parse(event.body).newmessage;
+  const newMessage = JSON.parse(event.body).message;
 
   if (!itemId) {
     return createResponse(400, { message: "Item ID is missing" });
